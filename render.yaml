@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: finvestor-api
+    env: python
+    buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_sm
+    startCommand: bash run.sh
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: GROQ_API_KEY
+        sync: false

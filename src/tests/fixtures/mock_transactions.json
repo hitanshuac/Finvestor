@@ -1,0 +1,5 @@
+[
+    {"customer_id": "TEST-ID", "age": 28, "transaction_date": "2026-07-01", "transaction_amount": 1000.0, "transaction_direction": "CR", "merchant_category": "Salary", "account_balance": 1000.0, "emi_amount": 0, "credit_score": 750, "txn_order": 0},
+    {"customer_id": "TEST-ID", "age": 28, "transaction_date": "2026-07-02", "transaction_amount": 200.0, "transaction_direction": "DR", "merchant_category": "Food", "account_balance": 800.0, "emi_amount": 0, "credit_score": 750, "txn_order": 1},
+    {"customer_id": "TEST-ID", "age": 28, "transaction_date": "2026-07-03", "transaction_amount": 300.0, "transaction_direction": "DR", "merchant_category": "Transport", "account_balance": 500.0, "emi_amount": 0, "credit_score": 750, "txn_order": 2}
+]

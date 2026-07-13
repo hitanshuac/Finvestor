@@ -1,0 +1,16 @@
+data/
+.secrets/
+.env
+*.parquet
+__pycache__/
+*.pyc
+.pytest_cache/
+*.db
+.antigravity/
+.venv/
+node_modules/
+.streamlit/
+.external_engines/
+.ruff_cache/
+dist/
+frontend/dist/

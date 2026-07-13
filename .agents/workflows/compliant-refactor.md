@@ -1,0 +1,53 @@
+---
+name: SRE-Compliant Agentic Refactor
+description: Orchestrates agentic-refactor and test-automation while strictly enforcing SRE SOPs, defensive programming, and Hack2Skill competition rules.
+---
+
+# SRE-Compliant Agentic Refactor
+
+This master orchestration workflow chains architectural decomposition (`agentic-refactor.md`) with continuous testing (`test-automation.md`) to execute large-scale codebase changes while ensuring zero violations of the project's core rule constraints.
+
+## 🚨 Phase 1: Rule Verification & Constraints Loading
+
+Before writing or modifying any code, the agent MUST read and internalize the following core mandates:
+
+1. **Competition Rules**: `.agents/rules/40-phase-deploy.md`, `.agents/rules/50-HACK2SKILL-competition-rules.md`
+2. **SRE SOP**: `.agents/rules/30-00-phase-test.md`, `.agents/rules/30-01-phase-test.md`
+3. **Defensive Programming**: `.agents/rules/00-00-core-safety.md`, `.agents/rules/00-01-core-safety.md`, `.agents/rules/00-02-core-safety.md`
+4. **Code Quality**: `.agents/rules/10-phase-audit.md`
+5. **Security / SAST**: `.agents/rules/20-00-phase-execute.md`, `.agents/rules/20-01-phase-execute.md`, `.agents/rules/20-02-phase-execute.md`
+
+*Failure to adhere to these rules during the refactor will result in pipeline failure.*
+
+---
+
+## 🛠️ Phase 2: Agentic Decomposition & Refactor
+
+Invoke the **`.agents/workflows/agentic-refactor.md`** workflow to begin structural changes.
+
+**During execution, the agent MUST ensure:**
+- No component is modified without a clear separation of concerns.
+- Pydantic models (or strict `TypedDict`s) are used as contracts for all I/O boundary layers.
+- Exception handling logs full context (Fail Fast, Never Fail Silent) rather than swallowing errors.
+- External API calls are strictly encapsulated and decoupled from raw UI events.
+
+---
+
+## 🧪 Phase 3: SRE Inner Loop Testing
+
+Immediately upon completing code modifications, the agent MUST invoke the **`.agents/workflows/test-automation.md`** workflow.
+
+1. **Execute Tests**: Run the host project's test suite using the detected framework (e.g., `pytest`, `jest`, `go test`).
+2. **Handle Failures**: If any tests fail (Non-Zero Exit Code), the agent MUST halt, diagnose the failure, fix the code according to defensive standards, and retry.
+3. **Success Condition**: The refactor is NOT complete until all tests pass (`Exit Code 0`) and the test output explicitly confirms collection/execution.
+
+---
+
+## ✅ Phase 4: Final Compliance Sign-off
+
+Once the Inner Loop succeeds, the agent must verify:
+1. No unauthorized secrets or API keys have been hardcoded (SAST compliance).
+2. The UI gracefully degrades under load (Defensive compliance).
+3. The codebase remains clean, well-commented, and ready for Hack2Skill evaluation.
+
+*The agent will then notify the user of the successful refactor and await approval for the Outer Loop master sync.*

@@ -1,0 +1,40 @@
+direction: right
+
+User: User Interaction
+AI: Aria (AI Avatar)
+Check: Complexity Assessor
+Direct: Direct Advisory
+RM: RM Handoff (Lead Gen)
+
+User -> AI: "Asks Financial Question"
+
+AI -> Check: "Analyzes Product Complexity"
+
+Check -> Direct: "Simple Product\n(FD, SIP, Savings)"
+Check -> RM: "Complex Product\n(ULIP, PMS, AIF)"
+
+Direct -> User: "Provides Actionable Advice"
+RM -> User: "Schedules Senior RM Call\n(Within 24 Hours)"
+
+# Styling for Sketch Mode
+classes: {
+  actor: {
+    style: {
+      fill: "#238636"
+      font-color: white
+      border-radius: 10
+    }
+  }
+  system: {
+    style: {
+      fill: "#1f6feb"
+      font-color: white
+    }
+  }
+}
+
+User.class: actor
+AI.class: system
+Check.class: system
+Direct.class: actor
+RM.class: actor

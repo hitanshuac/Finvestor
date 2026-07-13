@@ -1,0 +1,85 @@
+direction: right
+classes: {
+  dark: {
+    style: {
+      fill: "#0D1117"
+      stroke: "#0D1117"
+      font-color: "#FFFFFF"
+      font-size: 24
+    }
+  }
+  cluster: {
+    style: {
+      fill: "#161B22"
+      stroke: "#30363D"
+      font-color: "#FFFFFF"
+    }
+  }
+  enterprise: {
+    style: {
+      fill: "#1a2332"
+      stroke: "#f0883e"
+      font-color: "#FFFFFF"
+    }
+  }
+}
+
+user: "User" {
+  shape: person
+}
+
+"Frontend": {
+  class: cluster
+  streamlit: "main.py\n(Streamlit UI)"
+}
+
+"Enterprise API": {
+  class: enterprise
+  server: "api/server.py\n(FastAPI)"
+  pii: "PII Redactor\n(Microsoft Presidio)"
+}
+
+"Application Logic": {
+  class: cluster
+  data_engine: "src/data_engine.py\n(DuckDB & Pandas)"
+  avatar_ai: "src/avatar_ai.py\n(LiteLLM Router)"
+  config: "src/config.py\n(Prompts & Personas)"
+}
+
+"LLM Providers": {
+  class: cluster
+  primary: "Groq 70B\n(Primary)" {
+    shape: hexagon
+  }
+  fallback: "Groq 8B\n(Fallback)" {
+    shape: hexagon
+  }
+}
+
+"Observability": {
+  class: enterprise
+  langfuse: "Langfuse\n(Traces & Audit)" {
+    shape: cylinder
+  }
+}
+
+"Data Storage": {
+  class: cluster
+  csv: "bank_transactions.csv" {
+    shape: cylinder
+  }
+}
+
+user -> "Frontend".streamlit: "Interacts"
+"Frontend".streamlit -> "Enterprise API".server: "HTTP /v1/chat"
+"Enterprise API".server -> "Enterprise API".pii: "Scrub PII"
+"Enterprise API".pii -> "Application Logic".avatar_ai: "Clean Prompt"
+"Enterprise API".server -> "Application Logic".data_engine: "Customer_360"
+"Application Logic".data_engine -> "Data Storage".csv: "Reads 90-day Data"
+"Application Logic".data_engine -> "Application Logic".avatar_ai: "Injects Customer_360"
+"Application Logic".avatar_ai -> "Application Logic".config: "Loads Prompts"
+"Application Logic".avatar_ai -> "LLM Providers".primary: "Primary Call"
+"Application Logic".avatar_ai -> "LLM Providers".fallback: "Automatic Failover"
+"Application Logic".avatar_ai -> "Observability".langfuse: "Traces"
+"Application Logic".avatar_ai -> "Enterprise API".server: "JSON Response"
+"Enterprise API".server -> "Frontend".streamlit: "Response"

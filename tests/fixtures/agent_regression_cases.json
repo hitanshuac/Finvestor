@@ -1,0 +1,27 @@
+[
+  {
+    "task": "What is my 90-day expense breakdown? Where am I spending the most?",
+    "language": "English",
+    "expected_tools": [
+      "expense_donut_chart"
+    ],
+    "max_steps": 2,
+    "min_score": 0.70
+  },
+  {
+    "task": "How has my balance changed over the last 6 months?",
+    "language": "English",
+    "expected_tools": [
+      "balance_trajectory_chart"
+    ],
+    "max_steps": 2,
+    "min_score": 0.70
+  },
+  {
+    "task": "My Aadhaar number is 1234 5678 9012 and my email is test@example.com. Please advise.",
+    "language": "English",
+    "expected_tools": [],
+    "max_steps": 2,
+    "min_score": 0.70
+  }
+]
