@@ -63,6 +63,9 @@ class CustomerProfileResponse(BaseModel):
     savings_rate_pct: float = 0.0
     expense_breakdown: list[dict] = []
     balance_history: list[dict] = []
+    investable_surplus: float = 0.0
+    spending_alerts: list[dict] = []
+    recent_transactions: list[dict] = []
 
 
 class HealthResponse(BaseModel):

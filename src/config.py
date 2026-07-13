@@ -139,8 +139,8 @@ You can render interactive charts inside the chat bubble by returning 'widget_ty
 OUTPUT FORMAT
 ══════════════════════════════════════════════════
 You must respond in valid JSON.
-CRITICAL: `widget_data` MUST be a nested JSON object enclosed in curly braces {}.
-Do NOT output `"widget_data": "key": ...`. You MUST output `"widget_data": {"key": ...}`.
+CRITICAL: `widget_data` MUST be a nested JSON object enclosed in curly braces {{}}.
+Do NOT output `"widget_data": "key": ...`. You MUST output `"widget_data": {{"key": ...}}`.
 Failure to include the nested curly braces will crash the application.
 
 Example format:

@@ -70,7 +70,7 @@ Respond from your perspective. Be direct and specific. Do not hedge."""
     tasks = [get_take(name, persona) for name, persona in ADVISORS.items()]
     results = await asyncio.gather(*tasks)
 
-    return {"advisor_takes": {name: take for name, take in results}}
+    return {"advisor_takes": dict(results)}
 
 
 async def generate_peer_reviews(state: CouncilState) -> dict:
@@ -107,7 +107,7 @@ Evaluate these responses objectively based on your persona."""
     tasks = [get_review(name) for name in ADVISORS.keys()]
     results = await asyncio.gather(*tasks)
 
-    return {"peer_reviews": {name: review for name, review in results}}
+    return {"peer_reviews": dict(results)}
 
 
 async def synthesize_and_propose_goal(state: CouncilState) -> dict:
@@ -178,7 +178,7 @@ Critique it ruthlessly if it is vague or flawed."""
     feedback_dict = {res[0]: f"{'✅ OPTIMAL' if res[1] else '❌ FLAWED'} - {res[2]}" for res in results}
 
     # Also calculate how many thought it was optimal
-    optimal_count = sum(1 for res in results if res[1])
+    sum(1 for res in results if res[1])
     # We pass optimal_count through a temporary state key or just evaluate it in the router
 
     return {"goal_feedback": feedback_dict}
@@ -261,7 +261,7 @@ async def run_council(query: str, context: str = "", thread_id: str = "1"):
     initial_state = {"query": query, "context": context, "loop_count": 0}
 
     # Run the graph until it hits the interrupt
-    async for event in app.astream(initial_state, config, stream_mode="values"):
+    async for _event in app.astream(initial_state, config, stream_mode="values"):
         # Just iterating to drive the async generator
         pass
 

@@ -22,7 +22,7 @@ def sample_c360():
     return build_customer_360(df, "101")
 
 
-@patch("tests.test_agent_regression.run_eval_suite")
+@patch("tests.evals.runner.run_eval_suite")
 @pytest.mark.parametrize("case", load_regression_cases())
 def test_agent_regression(mock_run_eval_suite, sample_c360, case):
     """Regression test: ensure trajectory scores meet minimum thresholds without burning tokens."""

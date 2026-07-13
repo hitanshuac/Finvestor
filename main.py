@@ -455,7 +455,7 @@ def render_chat(c360: dict[str, Any], language: str, customer_id: str) -> None:
             # Send the contextual message to the LLM but display the clean user message
             # Slide window to last 4 messages to prevent token limits
             sliced_messages = messages[-5:-1] if len(messages) > 4 else messages[:-1]
-            context_messages = sliced_messages + [{"role": "user", "content": contextual_message}]
+            context_messages = [*sliced_messages, {"role": "user", "content": contextual_message}]
 
             raw_response = _get_llm_response_http(context_messages, customer_id, language)
 
