@@ -130,10 +130,7 @@ def render_sidebar_profile(c360: dict[str, Any], language: str, customer_name: s
 
         st.markdown("")
 
-        if st.button("🚪 Sign Out", use_container_width=True):
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.rerun()
+
 
         st.caption("© 2026 IDBI Bank · Finvestor MVP")
 
