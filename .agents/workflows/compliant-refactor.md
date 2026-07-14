@@ -11,11 +11,11 @@ This master orchestration workflow chains architectural decomposition (`agentic-
 
 Before writing or modifying any code, the agent MUST read and internalize the following core mandates:
 
-1. **Competition Rules**: `.agents/rules/40-phase-deploy.md`, `.agents/rules/50-HACK2SKILL-competition-rules.md`
-2. **SRE SOP**: `.agents/rules/30-00-phase-test.md`, `.agents/rules/30-01-phase-test.md`
-3. **Defensive Programming**: `.agents/rules/00-00-core-safety.md`, `.agents/rules/00-01-core-safety.md`, `.agents/rules/00-02-core-safety.md`
-4. **Code Quality**: `.agents/rules/10-phase-audit.md`
-5. **Security / SAST**: `.agents/rules/20-00-phase-execute.md`, `.agents/rules/20-01-phase-execute.md`, `.agents/rules/20-02-phase-execute.md`
+1. **Competition Rules**: `.agents/rules/50-HACK2SKILL-competition-rules.md`
+2. **SRE SOP**: `.agents/rules/30-01-phase-test.md`, `.agents/skills/test-engineering/SKILL.md`
+3. **Defensive Programming**: `.agents/skills/defensive-programming/SKILL.md`
+4. **Code Quality**: `.agents/skills/code-quality/SKILL.md`
+5. **Security / SAST**: `.agents/rules/20-00-phase-execute.md`, `.agents/skills/sast-compliance/SKILL.md`
 
 *Failure to adhere to these rules during the refactor will result in pipeline failure.*
 

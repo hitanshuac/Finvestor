@@ -11,7 +11,7 @@ Scaffold and build a production-grade FastAPI router cascade. The agent must fol
    - `02_TAD.md` (component architecture and data flow)
    - `03_SECURITY.md` (authentication strategy, RBAC, secret management)
    - `04_FRONTEND.md` (API contracts)
-2. The agent must reference `.agents/rules/30-*-phase-test.md` for system prompt injection and `.agents/rules/10-phase-audit.md` for payload management.
+2. The agent must reference `.agents/rules/20-00-phase-execute.md` for system prompt injection and `.agents/skills/sast-compliance/SKILL.md` for payload management.
 
 ## Execution Steps
 

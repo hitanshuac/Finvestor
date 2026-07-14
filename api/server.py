@@ -17,10 +17,9 @@ from api.schemas import (
     CustomerProfileResponse,
     HealthResponse,
 )
-from src.avatar_ai import get_llm_response
 from src.config import CUSTOMER_PROFILES, LLM_MODEL
 from src.data_engine import build_customer_360, load_transactions
-from src.pii_redactor import redact_pii
+from src.services.chat_pipeline import process_chat_request
 
 # Load environment variables
 load_dotenv()
@@ -60,14 +59,7 @@ def health_check() -> HealthResponse:
 
 @app.get("/v1/customer/{customer_id}/profile", response_model=CustomerProfileResponse)
 def get_customer_profile(customer_id: str) -> CustomerProfileResponse:
-    """Return the Customer_360 profile for a given customer ID.
-
-    Args:
-        customer_id: The customer identifier (e.g., "101", "102").
-
-    Returns:
-        CustomerProfileResponse: Aggregated financial metrics.
-    """
+    """Return the Customer_360 profile for a given customer ID."""
     allowed_ids = set(CUSTOMER_PROFILES.keys())
     if customer_id not in allowed_ids:
         raise HTTPException(status_code=404, detail=f"Customer {customer_id} not found.")
@@ -81,42 +73,5 @@ def get_customer_profile(customer_id: str) -> CustomerProfileResponse:
 
 @app.post("/v1/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
-    """Process a chat request with PII redaction and LLM advisory.
-
-    Pipeline:
-        1. Build Customer_360 profile from data engine.
-        2. Redact PII from the latest user message.
-        3. Call the LLM via LiteLLM (with automatic fallback).
-        4. Return the response.
-
-    Args:
-        request: Validated ChatRequest with customer_id, language, and messages.
-
-    Returns:
-        ChatResponse: The AI advisory response.
-    """
-    # Step 1: Build customer context
-    c360 = build_customer_360(_df, request.customer_id)
-    if not c360:
-        raise HTTPException(status_code=500, detail="Failed to build customer profile.")
-
-    # Step 2: Redact PII from messages before sending to LLM
-    sanitized_messages = []
-    pii_found = False
-    for msg in request.messages:
-        if msg.role == "user":
-            redacted_content, had_pii = redact_pii(msg.content)
-            if had_pii:
-                pii_found = True
-            sanitized_messages.append({"role": msg.role, "content": redacted_content})
-        else:
-            sanitized_messages.append({"role": msg.role, "content": msg.content})
-
-    # Step 3: Truncate to last 4 messages (guardrail)
-    max_history = 4
-    truncated = sanitized_messages[-max_history:] if len(sanitized_messages) > max_history else sanitized_messages
-
-    # Step 4: Call LLM
-    raw_response = get_llm_response(truncated, c360, request.language)
-
-    return ChatResponse(raw_response=raw_response, pii_redacted=pii_found)
+    """Process a chat request by delegating to the chat pipeline."""
+    return process_chat_request(request, _df)

@@ -14,3 +14,5 @@ node_modules/
 .ruff_cache/
 dist/
 frontend/dist/
+scratch/
+council_*.md

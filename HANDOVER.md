@@ -12,11 +12,17 @@ When you are dropped into this repository (or any repository adopting this struc
 2. **Review Error Observability:** Read `data/error_logs.json` (if it exists) to understand historical bugs and their resolution strategies. Do not repeat failed approaches.
 3. **Load Skills on Demand:** If asked to perform database optimizations or ETL engineering, read the corresponding `SKILL.md` files inside `.agents/skills/` to adopt the correct persona and constraints.
 
-## 2. The Split-Plane Architecture
+## 2. The Split-Plane Architecture & 5-Layer SoC
 This environment operates on a strict separation of concerns:
-- **Control Plane (`.agents/`, `.github/`, `docs/`)**: This is where you, the AI, receive your instructions, workflows, and CI/CD parameters.
-- **Application Plane (`src/`, `data/`)**: This is the actual execution logic and state.
-*Rule:* The Application Plane must mechanically implement the rules defined in the Control Plane.
+- **Control Plane (`.agents/`, `.github/`, `docs/`, `prompts/`)**: This is where you, the AI, receive your instructions, workflows, CI/CD parameters, and versionable prompt assets.
+- **Application Plane (`api/`, `src/`, `data/`)**: This is the actual execution logic and state.
+
+*Rule:* The Application Plane must mechanically implement the rules defined in the Control Plane. It must strictly adhere to a **5-Layer Architecture**:
+1. **API Router (`api/`)**: Thin HTTP endpoints only. No business logic.
+2. **Services (`src/services/`)**: Orchestration pipelines (e.g., chat processing, LLM calling).
+3. **Domain (`src/domain/`)**: Pure domain math and context building.
+4. **Data (`src/data_engine.py`)**: Pure persistence operations (DuckDB/Pandas).
+5. **UI (`src/ui/`)**: Presentation components for Streamlit.
 
 ## 3. Integrating into a NEW Project
 If a human asks you to scaffold a completely new project using this framework:

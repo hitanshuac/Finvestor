@@ -8,12 +8,13 @@ Langfuse callbacks are enabled when LANGFUSE_PUBLIC_KEY is set.
 import json
 import logging
 import os
+from pathlib import Path
 from typing import Any
 
 import litellm
 from langsmith import traceable
 
-from src.config import LLM_MODEL, get_system_prompt_template
+from src.config import LLM_MODEL
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -53,7 +54,11 @@ def build_system_prompt(c360: dict[str, Any], language: str) -> str:
     # Pre-computed investable surplus from real transaction data
     investable_surplus = c360.get("investable_surplus", 0.0)
 
-    template = get_system_prompt_template()
+    prompt_path = Path("prompts/system_prompt.md")
+    if not prompt_path.exists():
+        raise FileNotFoundError("Missing prompt asset: system_prompt")
+    template = prompt_path.read_text(encoding="utf-8")
+
     return template.format(
         language=language,
         c360_json=c360_json,

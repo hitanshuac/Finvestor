@@ -26,15 +26,16 @@ Eliminate the token-burn cycle of "write code → manually write tests → debug
 ## Execution Steps
 
 ### Phase 1: Stack Detection & Test Plan Generation
-1. **Detect Language/Framework:** Scan the repository (`package.json`, `pyproject.toml`, `go.mod`, etc.) to automatically determine the language and appropriate testing framework (e.g., Pytest, Jest, Go testing).
-2. **Analyze Requirements:** Read `05_TICKETS.md` and extract the **Acceptance Criteria**. If `05_TICKETS.md` does not exist, intelligently scan the codebase for untested modules.
-3. Output a `test_plan.md` in the project's `docs/` directory listing every test case with:
+1. **Phase Rule Injection (MANDATORY):** Execute the `view_file` tool on `d:\Projects\Finvestor\.agents\rules\30-00-phase-test.md` and read it completely before proceeding. Do not proceed until this tool call is made.
+2. **Detect Language/Framework:** Scan the repository (`package.json`, `pyproject.toml`, `go.mod`, etc.) to automatically determine the language and appropriate testing framework (e.g., Pytest, Jest, Go testing).
+3. **Analyze Requirements:** Read `05_TICKETS.md` and extract the **Acceptance Criteria**. If `05_TICKETS.md` does not exist, intelligently scan the codebase for untested modules.
+4. Output a `test_plan.md` in the project's `docs/` directory listing every test case with:
    - **Test Name** (descriptive naming convention appropriate for the framework)
    - **Test Type** (Unit / Integration / E2E)
    - **Setup** (what fixtures or mocks are needed)
    - **Action** (what operation is performed)
    - **Assertion** (what the expected outcome is)
-4. Present the test plan to the user for review before generating code.
+5. Present the test plan to the user for review before generating code.
 
 ### Phase 2: Test Scaffold Generation
 1. Generate test files in the appropriate framework-standard directory (e.g., `tests/`, `__tests__/`, `*_test.go`).

@@ -1,4 +1,4 @@
-from src.config import CREDENTIALS, CUSTOMER_PROFILES, LANGUAGES, LLM_MODEL, get_system_prompt_template
+from src.config import CREDENTIALS, CUSTOMER_PROFILES, LANGUAGES, LLM_MODEL
 
 
 def test_core_configurations():
@@ -12,7 +12,3 @@ def test_core_configurations():
     assert "Hindi" in LANGUAGES, "Missing Hindi language support"
 
     assert isinstance(LLM_MODEL, str) and LLM_MODEL != "", "LLM model must be defined"
-
-    template = get_system_prompt_template()
-    assert "{language}" in template, "System prompt missing language format parameter"
-    assert "{c360_json}" in template, "System prompt missing c360_json format parameter"

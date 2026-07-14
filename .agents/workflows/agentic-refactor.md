@@ -27,12 +27,7 @@ The agent must list the identified architectural flaws explicitly and assign the
 - 🟢 **Low (Tier 3-4)**: Compliance, pure maintainability, styling, or documentation issues.
 
 ## Phase 3: Layered Decomposition (To-Be)
-The agent must formulate a new architecture adhering strictly to the **Separation of Concerns (SoC)**. The proposed architecture MUST explicitly define these layers (if applicable to the stack):
-1. **State Management**: Typed, validated models (e.g., Pydantic) acting as the single source of truth.
-2. **Domain/Business Logic**: Pure, deterministic functions that take inputs and return outputs with zero side effects.
-3. **External Services**: API boundaries, LLM prompt logic, and external integrations isolated from core math.
-4. **Presentation/UI**: Thin orchestrators, views, or chart factories containing zero business logic.
-5. **Persistence**: Consolidated database or file I/O operations behind connection pools.
+The agent must formulate a new architecture adhering strictly to the **Separation of Concerns (SoC)**. Ensure the new architecture complies with the strict 5-layer SoC rules defined in `.agents/workflows/code-generation-preflight.md`.
 
 *Deliverable:* The agent MUST generate a clear representation (textual, bulleted, or diagrammatic) of the cleanly separated "To-Be" architecture.
 

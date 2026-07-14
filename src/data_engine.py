@@ -1,9 +1,6 @@
 """
 Data processing engine for generating mock transactions and DuckDB analytics.
-
-ROADMAP: Current batch CSV ingestion via DuckDB is built for MVP.
-Production architecture will replace this with real-time Apache Kafka
-streaming from IDBI Core Banking (Finacle/Flexcube).
+Strictly restricted to DuckDB/Persistence operations.
 """
 
 import logging
@@ -13,22 +10,17 @@ import duckdb
 import pandas as pd
 import streamlit as st
 
-logger: logging.Logger = logging.getLogger(__name__)
+from src.domain.finance import calculate_risk_profile, compute_investable_surplus
 
+logger: logging.Logger = logging.getLogger(__name__)
 
 @st.cache_data
 def load_transactions() -> pd.DataFrame:
-    """Load transactions from CSV and prepare for DuckDB analytics.
-
-    Returns:
-        pd.DataFrame: A DataFrame with the transaction history.
-    """
+    """Load transactions from CSV and prepare for DuckDB analytics."""
     try:
         df = pd.read_csv("data/bank_transactions.csv")
         df["transaction_date"] = pd.to_datetime(df["transaction_date"])
-        # Cast customer_id to string to match our Streamlit selectbox
         df["customer_id"] = df["customer_id"].astype(str)
-        # Ensure we sort by date appropriately and add txn_order for window functions
         df.sort_values(["customer_id", "transaction_date"], inplace=True)
         df.reset_index(drop=True, inplace=True)
         df["txn_order"] = range(len(df))
@@ -43,111 +35,12 @@ def load_transactions() -> pd.DataFrame:
         logger.error("Data type conversion error during CSV load: %s", e)
         return pd.DataFrame()
 
-
-def calculate_risk_profile(age: int, credit_score: int, savings_rate: float) -> str:
-    """Calculate a deterministic risk profile based on financial metrics.
-
-    Args:
-        age (int): Customer age.
-        credit_score (int): Customer credit score.
-        savings_rate (float): Calculated savings rate percentage.
-
-    Returns:
-        str: Risk profile category ("Aggressive", "Moderate", or "Conservative").
-    """
-    score = 0
-
-    if age < 35:
-        score += 4
-    elif age <= 50:
-        score += 2
-
-    if credit_score >= 750:
-        score += 3
-    elif credit_score >= 650:
-        score += 1
-    else:
-        score -= 2
-
-    if savings_rate >= 20.0:
-        score += 3
-    elif savings_rate >= 10.0:
-        score += 1
-
-    if score >= 8:
-        return "Aggressive"
-    elif score >= 5:
-        return "Moderate"
-    else:
-        return "Conservative"
-
-
-def compute_investable_surplus(total_inflow: float, total_outflow: float, months: int = 3) -> float:
-    """Compute monthly investable surplus from actual transaction data.
-
-    Investable surplus = (total inflow - total outflow) / months
-    This gives the average monthly amount the customer could invest
-    based on their real spending patterns.
-
-    Args:
-        total_inflow: Total credits over the period.
-        total_outflow: Total debits over the period.
-        months: Number of months in the data window (default 3 for 90-day).
-
-    Returns:
-        float: Monthly investable surplus (floored at 0).
-    """
-    if months <= 0:
-        return 0.0
-    monthly_net = (total_inflow - total_outflow) / months
-    return max(0.0, round(monthly_net, 2))
-
-
-def project_compound_growth(monthly_sip: float, annual_rate: float, years: int) -> list[float]:
-    """Calculate year-by-year SIP compound growth projections.
-
-    Uses the standard SIP future value formula:
-    FV = P * (((1 + r)^n - 1) / r) * (1 + r)
-    where P = monthly investment, r = monthly rate, n = total months.
-
-    Args:
-        monthly_sip: Monthly SIP amount in rupees.
-        annual_rate: Expected annual return rate (e.g., 12.0 for 12%).
-        years: Investment horizon in years.
-
-    Returns:
-        list[float]: Projected portfolio value at the end of each year.
-    """
-    if monthly_sip <= 0 or annual_rate <= 0 or years <= 0:
-        return []
-
-    monthly_rate = annual_rate / 100 / 12
-    projections: list[float] = []
-
-    for year in range(1, years + 1):
-        n = year * 12
-        fv = monthly_sip * (((1 + monthly_rate) ** n - 1) / monthly_rate) * (1 + monthly_rate)
-        projections.append(round(fv, 2))
-
-    return projections
-
-
 def build_customer_360(df: pd.DataFrame, customer_id: str) -> dict[str, Any]:
-    """Register `df` in an in-memory DuckDB and return a Customer_360 dict.
-
-    Args:
-        df (pd.DataFrame): The transaction history DataFrame.
-        customer_id (str): The ID of the customer to aggregate.
-
-    Returns:
-        Dict[str, Any]: A dictionary containing summary metrics. Returns an
-        empty dictionary gracefully if an error occurs.
-    """
+    """Register `df` in an in-memory DuckDB and return a Customer_360 dict."""
     try:
         con = duckdb.connect(":memory:")
         con.register("txn", df)
 
-        # Summary metrics
         summary = con.execute(
             """
             SELECT
@@ -167,7 +60,6 @@ def build_customer_360(df: pd.DataFrame, customer_id: str) -> dict[str, Any]:
             [customer_id],
         ).fetchone()
 
-        # Top 3 spending categories
         top_cats = con.execute(
             """
             SELECT merchant_category, ROUND(SUM(transaction_amount), 2) AS total
@@ -180,7 +72,6 @@ def build_customer_360(df: pd.DataFrame, customer_id: str) -> dict[str, Any]:
             [customer_id],
         ).fetchall()
 
-        # All spending categories for Donut Chart
         expense_breakdown = con.execute(
             """
             SELECT merchant_category, ROUND(SUM(transaction_amount), 2) AS total
@@ -192,7 +83,6 @@ def build_customer_360(df: pd.DataFrame, customer_id: str) -> dict[str, Any]:
             [customer_id],
         ).fetchall()
 
-        # Balance history for Area Chart
         balance_history = con.execute(
             """
             SELECT transaction_date, account_balance
@@ -203,7 +93,6 @@ def build_customer_360(df: pd.DataFrame, customer_id: str) -> dict[str, Any]:
             [customer_id],
         ).fetchall()
 
-        # Spending anomalies — categories where current month spend exceeds 3-month average by >50%
         spending_alerts = con.execute(
             """
             WITH monthly AS (
@@ -231,7 +120,6 @@ def build_customer_360(df: pd.DataFrame, customer_id: str) -> dict[str, Any]:
             [customer_id],
         ).fetchall()
 
-        # Recent transactions for Dashboard drill-down
         recent_transactions_raw = con.execute(
             """
             SELECT
@@ -250,7 +138,7 @@ def build_customer_360(df: pd.DataFrame, customer_id: str) -> dict[str, Any]:
 
         recent_txns = [
             {
-                "id": f"TXN-{8900 - i}",  # Simulated ID format to match frontend expectation
+                "id": f"TXN-{8900 - i}",
                 "date": str(row[0].date()) if hasattr(row[0], "date") else str(row[0])[:10],
                 "description": str(row[1]),
                 "category": str(row[2]),
@@ -273,8 +161,6 @@ def build_customer_360(df: pd.DataFrame, customer_id: str) -> dict[str, Any]:
             savings_rate_pct = ((total_inflow_val - total_outflow_val) / total_inflow_val) * 100
 
         risk_profile = calculate_risk_profile(age_val, credit_score_val, savings_rate_pct)
-
-        # Compute investable surplus from real data
         investable_surplus = compute_investable_surplus(total_inflow_val, total_outflow_val)
 
         return {

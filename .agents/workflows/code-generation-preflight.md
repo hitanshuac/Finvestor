@@ -11,13 +11,21 @@ This workflow simulates the "Design Review" and "Technical Spec" phases of a hig
 
 ## Phase 1: Requirement & Ecosystem Validation
 Before designing the code, the agent MUST:
-1. **Ticket Alignment:** Verify the intended code perfectly satisfies the current Acceptance Criteria in `docs/05_TICKETS.md`.
-2. **DRY (Don't Repeat Yourself) Check:** Search the existing `src/` directory. Is there an existing utility, Pydantic model, or helper function that can be reused instead of writing new code?
-3. **Git Discovery:** If bringing in external patterns, execute `.agents/workflows/git-discovery-preflight.md` to check for open-source precedent.
+1. **Phase Rule Injection (MANDATORY):** Execute the `view_file` tool on `d:\Projects\Finvestor\.agents\rules\20-00-phase-execute.md` and read it completely before writing a single line of code. Do not proceed until this tool call is made.
+2. **Ticket Alignment:** Verify the intended code perfectly satisfies the current Acceptance Criteria in `docs/05_TICKETS.md`.
+3. **DRY (Don't Repeat Yourself) Check:** Search the existing `src/` directory. Is there an existing utility, Pydantic model, or helper function that can be reused instead of writing new code?
+4. **Git Discovery:** If bringing in external patterns, execute `.agents/workflows/git-discovery-preflight.md` to check for open-source precedent.
 
 ## Phase 2: The Core Constraints Checklist
 The agent MUST explicitly verify its proposed implementation against the following active rules. If the proposed code violates ANY of these, the agent MUST redesign the approach.
 
+- [ ] **Tier 0 Architecture (Separation of Concerns)**
+  - Does the implementation adhere strictly to the **Separation of Concerns (SoC)**?
+  - **State Management**: Are typed, validated models (e.g., Pydantic) acting as the single source of truth?
+  - **Domain/Business Logic**: Are there pure, deterministic functions that take inputs and return outputs with zero side effects?
+  - **External Services**: Are API boundaries, LLM prompt logic, and external integrations isolated from core math?
+  - **Presentation/UI**: Are UI components thin orchestrators, views, or chart factories containing zero business logic? Is there a strict Validation/Translation layer between probabilistic LLM outputs and deterministic UI schemas?
+  - **Persistence**: Are database or file I/O operations consolidated behind connection pools?
 - [ ] **Tier 0 Safety (`00-*-core-safety.md`)**
   - Are we doing file I/O? If yes, is a Pydantic/TypedDict schema explicitly defined?
   - Are we using guard clauses at the top of the function?

@@ -18,14 +18,21 @@
 ## 📖 Overview
 This repository serves as the MVP for **Finvestor — Digital Wealth Advisory Avatar**, built for the IDBI Bank Hackathon (Track 1). The application is a modular Streamlit dashboard backed by an enterprise-grade FastAPI backend, featuring 6 core architectural layers strictly separating concerns:
 
-1. `api/server.py`: FastAPI backend that decouples the UI from the AI orchestration, providing secure endpoints (`/v1/chat`).
-2. `api/middleware/pii_redactor.py`: Microsoft Presidio integration with custom Indian recognizers (Aadhaar, PAN, IFSC) to scrub sensitive data before LLM transmission.
-3. `src/data_engine.py`: Loads domain-accurate 90-day INR transactions via Pandas from `data/bank_transactions.csv` and executes DuckDB Customer_360 SQL queries.
-4. `src/avatar_ai.py`: LiteLLM multi-provider router featuring the Aria Persona, automatic model failover (Groq 70B -> Groq 8B), and Langfuse observability tracing.
-5. `src/widgets.py` & `main.py`: Generative UI integration. The thin Streamlit presentation orchestrator intercepts LLM structured JSON to render in-chat interactive Plotly chart widgets (without brittle dynamic code generation).
-6. `src/config.py`: Hardcoded prompts, constants, and custom behavioral personas (e.g., High Spender vs. High Saver).
+1. `api/server.py`: Thin FastAPI HTTP router that exposes secure REST endpoints (`/v1/chat`).
+2. `src/services/chat_pipeline.py`: Decoupled orchestration layer handling business logic, PII redaction, and Customer 360 building.
+3. `src/domain/finance.py`: Pure domain logic containing risk profiling and investable surplus formulas (decoupled from data persistence).
+4. `src/data_engine.py`: Pure persistence layer. Loads domain-accurate transactions and executes DuckDB Customer_360 SQL queries.
+5. `src/ui/`: UI component presentation layer (`dashboard.py`, `chat.py`, `sidebar.py`) for the Streamlit dashboard.
+6. `prompts/system_prompt.md`: Externalized markdown prompt asset (following `prompt-registry-sync`), replacing hardcoded strings for versionable A/B testing.
 
 The underlying infrastructure utilizes a strict **Split-Plane Architecture** that separates the human-defined control plane (`.agents/`) from the system-managed data and state plane (`data/`).
+
+## 🧠 AI Context Optimization (Antigravity UI Config)
+To prevent "Lost in the Middle" context collapse in AI agents, this repository uses a deterministic routing strategy for its fragmented rules. **Do not set all `.agents/rules/` files to "Always On" in your IDE.** Configure your Antigravity AI UI as follows:
+- **`00-*-core-safety.md`**: `Always On`
+- **`20-*-phase-execute.md`**: `Glob` (`src/**/*.py`)
+- **`30-*-phase-test.md`**: `Glob` (`tests/**/*.py`)
+- **`10-phase-audit.md` & `40-phase-deploy.md`**: `Manual`
 
 ## 📦 Installation & Setup
 
@@ -57,8 +64,9 @@ bash run.sh
 ```text
 .
 ├── .agents/            # The Control Plane: Rules, Skills, and Workflows (Human Edited)
-├── api/                # The Enterprise Backend: FastAPI endpoints, Presidio PII Middleware, Pydantic schemas
-├── src/                # Application logic (data_engine, avatar_ai, config, widgets, tests)
+├── api/                # The Enterprise Backend: FastAPI endpoints and Pydantic schemas
+├── src/                # Application logic (domain, services, ui, data_engine, avatar_ai, config, widgets, tests)
+├── prompts/            # Externalized Markdown prompt assets for version control
 ├── main.py             # Thin Streamlit UI Orchestrator (Generative UI Renderer)
 ├── data/               # The Data Plane: DuckDB metrics, Quarantine DLQs, and Parquet files
 └── docs/               # Architecture Decision Records, PRDs, and Visual Assets
