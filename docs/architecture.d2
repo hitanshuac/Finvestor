@@ -28,22 +28,36 @@ user: "User" {
   shape: person
 }
 
-"Frontend": {
+"Presentation Layer": {
   class: cluster
-  streamlit: "main.py\n(Streamlit UI)"
+  ui: "src/ui/\n(Streamlit Components)"
+  main: "main.py\n(UI Orchestrator)"
 }
 
-"Enterprise API": {
+"API Router": {
   class: enterprise
-  server: "api/server.py\n(FastAPI)"
-  pii: "PII Redactor\n(Microsoft Presidio)"
+  server: "api/server.py\n(Thin FastAPI)"
 }
 
-"Application Logic": {
+"Services Layer": {
+  class: cluster
+  chat_pipeline: "src/services/chat_pipeline.py\n(Business Logic)"
+  avatar_ai: "src/avatar_ai.py\n(LiteLLM Router)"
+}
+
+"Domain Layer": {
+  class: cluster
+  finance: "src/domain/finance.py\n(Pure Math & Logic)"
+}
+
+"Data Engine": {
   class: cluster
   data_engine: "src/data_engine.py\n(DuckDB & Pandas)"
-  avatar_ai: "src/avatar_ai.py\n(LiteLLM Router)"
-  config: "src/config.py\n(Prompts & Personas)"
+}
+
+"External Assets": {
+  class: cluster
+  prompt: "prompts/system_prompt.md\n(Markdown Prompt)"
 }
 
 "LLM Providers": {
@@ -56,13 +70,6 @@ user: "User" {
   }
 }
 
-"Observability": {
-  class: enterprise
-  langfuse: "Langfuse\n(Traces & Audit)" {
-    shape: cylinder
-  }
-}
-
 "Data Storage": {
   class: cluster
   csv: "bank_transactions.csv" {
@@ -70,16 +77,16 @@ user: "User" {
   }
 }
 
-user -> "Frontend".streamlit: "Interacts"
-"Frontend".streamlit -> "Enterprise API".server: "HTTP /v1/chat"
-"Enterprise API".server -> "Enterprise API".pii: "Scrub PII"
-"Enterprise API".pii -> "Application Logic".avatar_ai: "Clean Prompt"
-"Enterprise API".server -> "Application Logic".data_engine: "Customer_360"
-"Application Logic".data_engine -> "Data Storage".csv: "Reads 90-day Data"
-"Application Logic".data_engine -> "Application Logic".avatar_ai: "Injects Customer_360"
-"Application Logic".avatar_ai -> "Application Logic".config: "Loads Prompts"
-"Application Logic".avatar_ai -> "LLM Providers".primary: "Primary Call"
-"Application Logic".avatar_ai -> "LLM Providers".fallback: "Automatic Failover"
-"Application Logic".avatar_ai -> "Observability".langfuse: "Traces"
-"Application Logic".avatar_ai -> "Enterprise API".server: "JSON Response"
-"Enterprise API".server -> "Frontend".streamlit: "Response"
+user -> "Presentation Layer".main: "Interacts"
+"Presentation Layer".main -> "Presentation Layer".ui: "Renders"
+"Presentation Layer".main -> "API Router".server: "HTTP /v1/chat"
+"API Router".server -> "Services Layer".chat_pipeline: "Delegates"
+"Services Layer".chat_pipeline -> "Domain Layer".finance: "Risk Profile"
+"Services Layer".chat_pipeline -> "Data Engine".data_engine: "Customer_360"
+"Data Engine".data_engine -> "Data Storage".csv: "Reads Data"
+"Services Layer".chat_pipeline -> "Services Layer".avatar_ai: "Builds Request"
+"Services Layer".avatar_ai -> "External Assets".prompt: "Loads Persona"
+"Services Layer".avatar_ai -> "LLM Providers".primary: "Primary Call"
+"Services Layer".avatar_ai -> "LLM Providers".fallback: "Automatic Failover"
+"Services Layer".chat_pipeline -> "API Router".server: "JSON Response"
+"API Router".server -> "Presentation Layer".main: "Response"
