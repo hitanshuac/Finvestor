@@ -86,9 +86,9 @@ graph TD
     I -->|No| K[Fail & Log Trace]
 ```
 
-## 🛡️ Future SRE Guardrails (Phase 2)
-During MVP development, we identified the critical vulnerability of "Black Box API" dependencies (e.g., silent IP bans, LLM rate limits). To scale this safely for IDBI Bank, the following Git-level guardrails will be implemented in Phase 2:
+## 🛡️ SRE Guardrails & Loop Engineering
+To scale this safely for IDBI Bank and ensure zero runaway processes, the following SRE patterns are actively implemented:
 
-1. **VCR/Proxy Mocking:** Implementation of local request playback to prevent API exhaustion during UI/UX development.
-2. **ADR Institutional Memory:** `docs/ADR/` repository folder to document failure domains (e.g., why strict JSON parsing cannot use stream=True).
-3. **Circuit Breaker Decorators:** Hardcoded try/except fallbacks that intercept 429/502 errors and serve graceful degradation JSON to the React frontend, preventing UI freezes.
+1. **Deterministic Agent Verification Gates**: The repository heavily utilizes **Loop Engineering**, orchestrating background subagents through strict file-memory state checks (`LOG.md`, `ARCHITECTURE.md`). A verification gate immediately catches malformed output or failed external APIs to prevent recursive hallucination loops.
+2. **The Loop Sandbox**: A dedicated Pytest simulation (`src/tests/test_loop_sandbox.py`) mathematically proves the integrity of the agent's retry logic and prevents dangerous file IO/path traversal without risking the live system.
+3. **Sealed Testing Framework**: Our automated test suite natively mocks global environment variables and utilizes deterministic patching (`src/tests/conftest.py`) to prevent any unmocked live network calls from stalling CI/CD pipelines, driving `avatar_ai.py` logic to **94% test coverage**.

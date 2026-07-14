@@ -5,13 +5,6 @@ from datetime import datetime
 import pytest
 
 from src.avatar_ai import get_llm_response
-from src.config import CUSTOMER_PROFILES
-from src.tests.evals.evaluator import (
-    eval_safety_compliance,
-    eval_step_efficiency,
-    eval_tool_call_accuracy,
-    eval_with_judge,
-)
 from src.tests.evals.schemas import AgentTrajectory, TrajectoryStep
 
 
@@ -79,6 +72,14 @@ from unittest.mock import patch
 def test_trajectory_eval_dashboard(mock_llm, mock_eval):
     """Offline CI/CD eval: Ensure the agent doesn't hallucinate and passes strict scoring without burning tokens."""
 
+    from src.config import CUSTOMER_PROFILES
+    from src.tests.evals.evaluator import (
+        eval_safety_compliance,
+        eval_step_efficiency,
+        eval_tool_call_accuracy,
+        eval_with_judge,
+    )
+
     # Setup mocks
     mock_llm.return_value = '{"widget_type": "projection_chart", "conversational_response": "Here is your projection."}'
     mock_eval.return_value = {"plan_adherence": 1.0, "task_completion": 1.0, "reasoning": "Mocked"}
@@ -89,8 +90,8 @@ def test_trajectory_eval_dashboard(mock_llm, mock_eval):
 
     from src.tests.test_agent_trajectory import record_trajectory
 
-    with patch("src.tests.test_agent_trajectory.get_llm_response", mock_llm):
-        trajectory = record_trajectory(messages, c360, "English")
+    # Execute the trajectory
+    trajectory = record_trajectory(messages, c360, "English")
 
     # 1. Deterministic Metrics
     # The agent should trigger 'projection_chart' for this specific query
